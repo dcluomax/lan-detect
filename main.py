@@ -6,8 +6,10 @@ import json
 
 app = Flask(__name__)
 scheduler = None
+ntfy_server = "https://ntfy.sh/topic"
 ntfy_user = ""
 ntfy_pass = ""
+ip_range = '192.168.0.0/24'
 port = 5000
 
 # Load known MAC addresses from file
@@ -21,8 +23,18 @@ except FileNotFoundError:
 # Define function to scan network
 def scan_network():
     with app.app_context():
+        # Load known MAC addresses from file
+        global known_macs
+        try:
+            with open('known_macs.json') as f:
+                known_macs_file = json.load(f)
+        except FileNotFoundError:
+            known_macs_file = []
+
+        # Merge the known MAC addresses from file and the running list
+        known_macs = list(set(known_macs_file + known_macs))
         # Set up ARP request
-        arp = ARP(pdst='192.168.1.0/24')
+        arp = ARP(pdst=ip_range)
         ether = Ether(dst='ff:ff:ff:ff:ff:ff')
         packet = ether/arp
 
@@ -48,7 +60,7 @@ def scan_network():
             message = f"Unknown devices detected:\n"
             for device in unknown_devices:
                 message += f"- {device['mac']} ({device['ip']})\n"
-            response = requests.post('https://ntfy.maxluo.org/home-stats', auth=(ntfy_user, ntfy_pass), data=message.strip())
+            response = requests.post(ntfy_server, auth=(ntfy_user, ntfy_pass), data=message.strip())
 
         # Create device list and return as JSON
         devices = known_devices + unknown_devices
@@ -64,6 +76,16 @@ def scan():
 # Define endpoint to get known MAC addresses
 @app.route('/known-macs')
 def get_known_macs():
+    global known_macs
+    # Load known MAC addresses from file
+    try:
+        with open('known_macs.json') as f:
+            known_macs_file = json.load(f)
+    except FileNotFoundError:
+        known_macs_file = []
+
+    # Merge the known MAC addresses from file and the running list
+    known_macs = list(set(known_macs_file + known_macs))
     return jsonify(known_macs)
 
 # Define endpoint to add known MAC address

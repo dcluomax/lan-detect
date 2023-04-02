@@ -17,7 +17,6 @@ To run LAN-Detect, navigate to the cloned directory and run the following comman
 This will start the Flask application and open it on port 5000. You can then access the following endpoints:
 
 `/scan`: scans the network for connected devices and returns a JSON list of devices, along with a known parameter indicating whether each device is known or unknown.
-`/known-macs`: returns a JSON list of known MAC addresses.
 `/start`: starts a scheduler that scans the network at a specified interval (default 60 seconds).
 `/stop`: stops the scheduler.
 API Reference
@@ -31,8 +30,20 @@ Sends an ARP request to the local network and returns a JSON list of connected d
 `/known-macs` [Get]
 Returns a JSON list of known MAC addresses.
 
-`/known-mac` [Post]
+`/known-macs` [Post]
 Adds a known MAC address to the list. Requires a mac parameter in the request body.
+```
+POST /known-macs
+Content-Type: application/json
+
+{
+    [
+        "00:11:22:33:44:55",
+        "11:22:33:44:55:66",
+        "22:33:44:55:66:77"
+    ]
+}
+```
 
 `/start`
 Starts a scheduler that runs the /scan endpoint at a specified interval. Requires an optional interval parameter in the query string, which specifies the interval in seconds (default 60).
