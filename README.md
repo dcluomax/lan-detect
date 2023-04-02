@@ -4,7 +4,7 @@ LAN-Detect is a Python script that scans the local network for connected devices
 # Installation
 To install LAN-Detect, first clone the repository:
 
-`git clone https://github.com/username/lan-detect.git`
+`git clone https://github.com/dcluomax/lan-detect.git`
 
 Then, install the required modules:
 
